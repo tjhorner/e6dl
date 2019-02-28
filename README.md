@@ -6,7 +6,7 @@ It does basically the same thing as [this tool](https://www.npmjs.com/package/e6
 
 It supports concurrently downloading posts, and you can set a maximum number of workers that should be downloading at a time.
 
-I made this because I wanted to rewrite one of my previous projects in Go, so I decided to start with this one since it's a pretty small and simple command line tool.
+I made this because I wanted to rewrite one of my previous projects in Go, so I decided to start with this one since it's a pretty small and simple command line tool that encapsulates a lot of concepts in the language (type definition, imports, goroutines, standard libraries, slices, to name a few).
 
 ## Installing, Building, etc.
 
