@@ -44,14 +44,30 @@ func work(wn int, posts []Post, directory string, completed *int, total *int, wg
 
 	for _, post := range posts {
 		*completed++
-		fmt.Printf("[%d/%d] [w%d] Downloading post %d (%s)...\n", *completed, *total, wn, post.ID, humanize.Bytes(uint64(post.FileSize)))
+		fmt.Printf(
+			"[%d/%d] [w%d] Downloading post %d (%s) -> %s...\n",
+			*completed,
+			*total,
+			wn,
+			post.ID,
+			humanize.Bytes(uint64(post.FileSize)),
+			getSavePath(&post, &directory),
+		)
 		downloadPost(&post, directory)
 	}
 }
 
-func downloadPost(post *Post, directory string) {
+func getSavePath(post *Post, directory *string) string {
 	pathSliced := strings.Split(post.FileURL, ".")
 	extension := pathSliced[len(pathSliced)-1]
+
+	savePath := path.Join(*directory, strconv.Itoa(post.ID)+"."+extension)
+
+	return savePath
+}
+
+func downloadPost(post *Post, directory string) {
+	savePath := getSavePath(post, &directory)
 
 	resp, err := HTTPGet(post.FileURL)
 	if err != nil {
@@ -65,8 +81,6 @@ func downloadPost(post *Post, directory string) {
 		fmt.Println("Unable to read post response body, skipping...")
 		return
 	}
-
-	savePath := path.Join(directory, strconv.Itoa(post.ID)+"."+extension)
 
 	err = ioutil.WriteFile(savePath, body, 0755)
 	if err != nil {
