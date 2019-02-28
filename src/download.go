@@ -19,8 +19,8 @@ func BeginDownload(posts *[]Post, saveDirectory *string, maxConcurrents *int) {
 	total := len(*posts)
 
 	// Distribute the posts based on the number of workers
-	ppw := len(*posts) / *maxConcurrents
-	mod := len(*posts) % *maxConcurrents
+	ppw := len(*posts) / *maxConcurrents // ppw: posts per worker
+	mod := len(*posts) % *maxConcurrents // mod: remainder of posts
 
 	for i := 0; i < *maxConcurrents; i++ {
 		postsLower := i * ppw
