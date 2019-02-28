@@ -4,6 +4,8 @@ This is a command line tool for downloading posts that match certain tags on e62
 
 It does basically the same thing as [this tool](https://www.npmjs.com/package/e6dl) except it was written in Go and the output is a lot less pretty.
 
+It supports concurrently downloading posts, and you can set a maximum number of workers that should be downloading at a time.
+
 I made this because I wanted to rewrite one of my previous projects in Go, so I decided to start with this one since it's a pretty small and simple command line tool.
 
 ## Installing, Building, etc.
