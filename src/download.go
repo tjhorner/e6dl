@@ -11,10 +11,15 @@ import (
 	"github.com/dustin/go-humanize"
 )
 
-// BeginDownload is meant to be called as a goroutine and begins the post download process.
-func BeginDownload(posts *[]Post, saveDirectory *string, maxConcurrents *int) {
+// BeginDownload takes a slice of posts, a directory to save them in, and a
+// number of concurrent workers to make. It blocks until all the post have
+// been processed. It returns the number of successes, failures, and the total
+// amount of posts.
+func BeginDownload(posts *[]Post, saveDirectory *string, maxConcurrents *int) (*int, *int, *int) {
 	var wg sync.WaitGroup
 	var completed int
+	var successes int
+	var failures int
 
 	total := len(*posts)
 
@@ -33,17 +38,20 @@ func BeginDownload(posts *[]Post, saveDirectory *string, maxConcurrents *int) {
 		}
 
 		wg.Add(1)
-		go work(i+1, (*posts)[postsLower:postsUpper], *saveDirectory, &completed, &total, &wg)
+		go work(i+1, (*posts)[postsLower:postsUpper], *saveDirectory, &completed, &successes, &failures, &total, &wg)
 	}
 
 	wg.Wait()
+
+	return &successes, &failures, &total
 }
 
-func work(wn int, posts []Post, directory string, completed *int, total *int, wg *sync.WaitGroup) {
+func work(wn int, posts []Post, directory string, completed *int, successes *int, failures *int, total *int, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for _, post := range posts {
 		*completed++
+
 		fmt.Printf(
 			"[%d/%d] [w%d] Downloading post %d (%s) -> %s...\n",
 			*completed,
@@ -53,7 +61,14 @@ func work(wn int, posts []Post, directory string, completed *int, total *int, wg
 			humanize.Bytes(uint64(post.FileSize)),
 			getSavePath(&post, &directory),
 		)
-		downloadPost(&post, directory)
+
+		err := downloadPost(&post, directory)
+		if err != nil {
+			fmt.Printf("[w%d] Failed to download post: %v\n", err)
+			*failures++
+		} else {
+			*successes++
+		}
 	}
 }
 
@@ -66,25 +81,25 @@ func getSavePath(post *Post, directory *string) string {
 	return savePath
 }
 
-func downloadPost(post *Post, directory string) {
+func downloadPost(post *Post, directory string) error {
 	savePath := getSavePath(post, &directory)
 
 	resp, err := HTTPGet(post.FileURL)
 	if err != nil {
-		fmt.Println("Unable to download, skipping...")
-		return
+		return err
 	}
+
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Unable to read post response body, skipping...")
-		return
+		return err
 	}
 
 	err = ioutil.WriteFile(savePath, body, 0755)
 	if err != nil {
-		fmt.Printf("Error: could not write to file: %v\n", err)
-		return
+		return err
 	}
+
+	return nil
 }
