@@ -35,7 +35,7 @@ Usage of e6dl:
   --out string
     	The directory to write the downloaded posts to (default "dl")
   --sfw
-    	Download posts from e926 instead of e621.
+    	Download posts from e926 instead of e621
   --tags string
     	Tags to search for
 ```

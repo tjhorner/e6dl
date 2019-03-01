@@ -13,7 +13,7 @@ func main() {
 	maxConcurrents := flag.Int("concurrents", 5, "Maximum amount of concurrent downloads")
 	postLimit := flag.Int("limit", 10, "Maximum amount of posts to grab from e621")
 	saveDirectory := flag.String("out", "dl", "The directory to write the downloaded posts to")
-	sfw := flag.Bool("sfw", false, "Download posts from e926 instead of e621.")
+	sfw := flag.Bool("sfw", false, "Download posts from e926 instead of e621")
 
 	flag.Parse()
 
