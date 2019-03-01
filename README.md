@@ -14,6 +14,16 @@ I made this because I wanted to rewrite one of my previous projects in Go, so I 
 
 See [here](https://github.com/tjhorner/nplcsv/blob/master/README.md) since it uses the same Makefile.
 
+## Example
+
+Here's a situation that uses every flag:
+
+If you wanted to download a maximum of 20 posts with the tag `pokemon` in random order from e926 to the directory `./posts` with a maximum of 2 downloading at a time:
+
+```bash
+e6dl --tags "pokemon order:random" --out ./posts --limit 20 --concurrents 2 --sfw
+```
+
 ## Usage
 
 ```
