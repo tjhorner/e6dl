@@ -38,5 +38,5 @@ func main() {
 
 	successes, failures, _ := BeginDownload(&posts, saveDirectory, maxConcurrents)
 
-	fmt.Printf("All done! %d posts downloaded and saved. (%d failed to download)\n", *successes, *failures)
+	fmt.Printf("\nAll done! %d posts downloaded and saved. (%d failed to download)\n", *successes, *failures)
 }
