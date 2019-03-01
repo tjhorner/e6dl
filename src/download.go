@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/dustin/go-humanize"
 )
@@ -39,6 +40,9 @@ func BeginDownload(posts *[]Post, saveDirectory *string, maxConcurrents *int) (*
 
 		wg.Add(1)
 		go work(i+1, (*posts)[postsLower:postsUpper], *saveDirectory, &completed, &successes, &failures, &total, &wg)
+		// Spawn workers with a little bit of a delay so as to not DDOS e621
+		// but also make the initial numbers show up correctly
+		time.Sleep(50 * time.Millisecond)
 	}
 
 	wg.Wait()
