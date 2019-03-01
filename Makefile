@@ -32,3 +32,6 @@ install: build
 
 uninstall:
 	rm $(INSTALLPATH)/e6dl
+
+run:
+	@- go run src/*.go
