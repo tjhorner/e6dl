@@ -64,7 +64,7 @@ func work(wn int, posts []Post, directory string, completed *int, successes *int
 
 		err := downloadPost(&post, directory)
 		if err != nil {
-			fmt.Printf("[w%d] Failed to download post: %v\n", err)
+			fmt.Printf("[w%d] Failed to download post %d: %v\n", wn, post.ID, err)
 			*failures++
 		} else {
 			*successes++
