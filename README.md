@@ -1,5 +1,7 @@
 # e6dl
 
+**["I don't care about any of this, just take me to the downloads"](https://github.com/tjhorner/e6dl/releases/latest)**
+
 This is a command line tool for downloading posts that match certain tags on e621 or e926.
 
 It does basically the same thing as [this tool](https://www.npmjs.com/package/e6dl) except it was written in Go and the output is a lot less pretty.
