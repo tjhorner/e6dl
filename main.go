@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/tjhorner/e6dl/concurrent"
 	"github.com/tjhorner/e6dl/e621"
 )
 
@@ -38,7 +39,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	successes, failures, _ := e621.BeginDownload(&posts, saveDirectory, maxConcurrents)
+	successes, failures, _ := concurrent.BeginDownload(&posts, saveDirectory, maxConcurrents)
 
 	fmt.Printf("\nAll done! %d posts downloaded and saved. (%d failed to download)\n", *successes, *failures)
 }

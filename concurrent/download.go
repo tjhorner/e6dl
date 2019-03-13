@@ -1,4 +1,4 @@
-package e621
+package concurrent
 
 import (
 	"fmt"
@@ -10,13 +10,14 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
+	"github.com/tjhorner/e6dl/e621"
 )
 
 // BeginDownload takes a slice of posts, a directory to save them in, and a
 // number of concurrent workers to make. It blocks until all the post have
 // been processed. It returns the number of successes, failures, and the total
 // amount of posts.
-func BeginDownload(posts *[]Post, saveDirectory *string, maxConcurrents *int) (*int, *int, *int) {
+func BeginDownload(posts *[]e621.Post, saveDirectory *string, maxConcurrents *int) (*int, *int, *int) {
 	var wg sync.WaitGroup
 	var completed int
 	var successes int
@@ -50,7 +51,7 @@ func BeginDownload(posts *[]Post, saveDirectory *string, maxConcurrents *int) (*
 	return &successes, &failures, &total
 }
 
-func work(wn int, posts []Post, directory string, completed *int, successes *int, failures *int, total *int, wg *sync.WaitGroup) {
+func work(wn int, posts []e621.Post, directory string, completed *int, successes *int, failures *int, total *int, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for _, post := range posts {
@@ -76,7 +77,7 @@ func work(wn int, posts []Post, directory string, completed *int, successes *int
 	}
 }
 
-func getSavePath(post *Post, directory *string) string {
+func getSavePath(post *e621.Post, directory *string) string {
 	pathSliced := strings.Split(post.FileURL, ".")
 	extension := pathSliced[len(pathSliced)-1]
 
@@ -85,10 +86,10 @@ func getSavePath(post *Post, directory *string) string {
 	return savePath
 }
 
-func downloadPost(post *Post, directory string) error {
+func downloadPost(post *e621.Post, directory string) error {
 	savePath := getSavePath(post, &directory)
 
-	resp, err := HTTPGet(post.FileURL)
+	resp, err := e621.HTTPGet(post.FileURL)
 	if err != nil {
 		return err
 	}
