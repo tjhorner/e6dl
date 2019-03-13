@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
+	"github.com/logrusorgru/aurora"
 	"github.com/tjhorner/e6dl/e621"
 )
 
@@ -56,15 +57,17 @@ func work(wn int, posts []e621.Post, directory string, completed *int, successes
 	for _, post := range posts {
 		*completed++
 
-		fmt.Printf(
-			"[%d/%d] [w%d] Downloading post %d (%s) -> %s...\n",
-			*completed,
-			*total,
-			wn,
+		progress := aurora.Sprintf(aurora.Green("[%d/%d]"), *completed, *total)
+		workerText := aurora.Sprintf(aurora.Cyan("[w%d]"), wn)
+
+		fmt.Println(aurora.Sprintf(
+			"%s %s Downloading post %d (%s) -> %s...",
+			progress,
+			workerText,
 			post.ID,
 			humanize.Bytes(uint64(post.FileSize)),
 			getSavePath(&post, &directory),
-		)
+		))
 
 		err := downloadPost(&post, directory)
 		if err != nil {
