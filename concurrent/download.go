@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"path"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -78,10 +77,7 @@ func work(wn int, posts []e621.Post, directory string, completed *int, successes
 }
 
 func getSavePath(post *e621.Post, directory *string) string {
-	pathSliced := strings.Split(post.FileURL, ".")
-	extension := pathSliced[len(pathSliced)-1]
-
-	savePath := path.Join(*directory, strconv.Itoa(post.ID)+"."+extension)
+	savePath := path.Join(*directory, strconv.Itoa(post.ID)+"."+post.FileExt)
 
 	return savePath
 }

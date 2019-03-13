@@ -9,35 +9,35 @@ import (
 
 // Post represents an e621 post object returned by the e621 API.
 type Post struct {
-	ID             int            `json:"id"`
-	Tags           string         `json:"tags"`
-	LockedTags     bool           `json:"locked_tags"`
-	Description    string         `json:"description"`
-	CreatedAt      SerializedDate `json:"created_at"`
-	CreatorID      int            `json:"creator_id"`
-	Author         string         `json:"author"`
-	Change         int            `json:"change"`
-	Source         string         `json:"source"`
-	Score          int            `json:"score"`
-	FavoritesCount int            `json:"fav_count"`
-	MD5Hash        string         `json:"md5"`
-	FileSize       int            `json:"file_size"`
-	FileURL        string         `json:"file_url"`
-	FileExt        string         `json:"file_ext"`
-	PreviewURL     string         `json:"preview_url"`
-	PreviewHeight  int            `json:"preview_height"`
-	PreviewWidth   int            `json:"preview_width"`
-	Rating         string         `json:"rating"`
-	Status         string         `json:"status"`
-	Width          int            `json:"width"`
-	Height         int            `json:"height"`
-	HasComments    bool           `json:"has_comments"`
-	HasNotes       bool           `json:"has_notes"`
-	HasChildren    bool           `json:"has_children"`
-	Children       string         `json:"children"`
-	ParentID       int            `json:"parent_id"`
-	Artist         []string       `json:"artist"`
-	Sources        []string       `json:"sources"`
+	ID             int            `json:"id"`             // The ID of the post
+	Tags           string         `json:"tags"`           // Space-separated list of tags attached to this post
+	LockedTags     bool           `json:"locked_tags"`    // (undocumented)
+	Description    string         `json:"description"`    // The post's description
+	CreatedAt      SerializedDate `json:"created_at"`     // When the post was uploaded
+	CreatorID      int            `json:"creator_id"`     // User ID of the user who uploaded the post
+	Author         string         `json:"author"`         // Username of the user who uploaded the post
+	Change         int            `json:"change"`         // (undocumented)
+	Source         string         `json:"source"`         // URL that the source for this post can be found at
+	Score          int            `json:"score"`          // The post's score (upvotes - downvotes)
+	FavoritesCount int            `json:"fav_count"`      // Amount of users that favorited this post
+	MD5Hash        string         `json:"md5"`            // MD5-sum of the post's file's content
+	FileSize       int            `json:"file_size"`      // Size of the post's file
+	FileURL        string         `json:"file_url"`       // URL to the full-sized file
+	FileExt        string         `json:"file_ext"`       // File extension
+	PreviewURL     string         `json:"preview_url"`    // URL to preview-sized version of the file
+	PreviewHeight  int            `json:"preview_height"` // Height of the preview
+	PreviewWidth   int            `json:"preview_width"`  // Width of the preview
+	Rating         string         `json:"rating"`         // Rating of the file ("safe", "questionable", "explicit")
+	Status         string         `json:"status"`         // Moderation status ("active" or "pending")
+	Width          int            `json:"width"`          // Width of the original file
+	Height         int            `json:"height"`         // Height of the original file
+	HasComments    bool           `json:"has_comments"`   // True if post has comments
+	HasNotes       bool           `json:"has_notes"`      // True if post has notes
+	HasChildren    bool           `json:"has_children"`   // True if post has children
+	Children       string         `json:"children"`       // Comma-separated list of children post IDs
+	ParentID       int            `json:"parent_id"`      // ID of the parent post
+	Artist         []string       `json:"artist"`         // Slice of artist names
+	Sources        []string       `json:"sources"`        // Slice of source URLs
 }
 
 // SerializedDate represents a serialized date passed via JSON
