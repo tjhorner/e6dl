@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path"
+
+	"github.com/tjhorner/e6dl/e621"
 )
 
 func main() {
@@ -19,7 +21,7 @@ func main() {
 
 	fmt.Printf("Fetching posts for \"%v\" (limit %v)\n", *tags, *postLimit)
 
-	posts, err := GetPostsForTags(*tags, *postLimit, *sfw)
+	posts, err := e621.GetPostsForTags(*tags, *postLimit, *sfw)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -36,7 +38,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	successes, failures, _ := BeginDownload(&posts, saveDirectory, maxConcurrents)
+	successes, failures, _ := e621.BeginDownload(&posts, saveDirectory, maxConcurrents)
 
 	fmt.Printf("\nAll done! %d posts downloaded and saved. (%d failed to download)\n", *successes, *failures)
 }

@@ -1,4 +1,4 @@
-package main
+package e621
 
 import (
 	"net/http"

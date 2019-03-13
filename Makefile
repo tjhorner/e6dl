@@ -8,21 +8,21 @@ ensure-dist-dir:
 
 dist-win: ensure-dist-dir
 	# Build for Windows x64
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -o dist/e6dl-windows-amd64.exe src/*.go
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -o dist/e6dl-windows-amd64.exe main.go
 
 dist-macos: ensure-dist-dir
 	# Build for macOS x64
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o dist/e6dl-darwin-amd64 src/*.go
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o dist/e6dl-darwin-amd64 main.go
 
 dist-linux: ensure-dist-dir
 	# Build for Linux x64
-	GOOS=linux GOARCH=amd64 $(GOBUILD) -o dist/e6dl-linux-amd64 src/*.go
+	GOOS=linux GOARCH=amd64 $(GOBUILD) -o dist/e6dl-linux-amd64 main.go
 
 dist: dist-win dist-macos dist-linux
 
 build:
 	@- mkdir -p bin
-	$(GOBUILD) -o bin/e6dl src/*.go
+	$(GOBUILD) -o bin/e6dl main.go
 	@- chmod +x bin/e6dl
 
 install: build
@@ -34,4 +34,4 @@ uninstall:
 	rm $(INSTALLPATH)/e6dl
 
 run:
-	@- go run src/*.go
+	@- go run main.go
