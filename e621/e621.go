@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 // Post represents an e621 post object returned by the e621 API.
@@ -43,8 +44,13 @@ type Post struct {
 // SerializedDate represents a serialized date passed via JSON
 type SerializedDate struct {
 	JSONClass   string `json:"json_class"`
-	Seconds     int    `json:"s"`
-	Nanoseconds int    `json:"n"`
+	Seconds     int64  `json:"s"`
+	Nanoseconds int64  `json:"n"`
+}
+
+// Time returns a time.Time object representing the SerializedDate
+func (date *SerializedDate) Time() time.Time {
+	return time.Unix(0, date.Nanoseconds)
 }
 
 // GetPostsForTags gets a list of e621 Posts

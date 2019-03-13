@@ -12,9 +12,58 @@ It supports concurrently downloading posts, and you can set a maximum number of 
 
 I made this because I wanted to rewrite one of my previous projects in Go, so I decided to start with this one since it's a pretty small and simple command line tool that encapsulates a lot of concepts in the language (type definition, imports, goroutines, standard libraries, slices, to name a few).
 
-## Installing, Building, etc.
+## Installing
 
-See [here](https://github.com/tjhorner/nplcsv/blob/master/README.md) since it uses the same Makefile.
+### Prebuilt Binaries
+
+There is an install script available for Linux/macOS [here](https://github.com/tjhorner/e6dl/blob/master/install.sh). It automatically grabs the latest release (at the time of writing) and saves to `/usr/local/bin/e6dl`.
+
+### From Source
+
+Clone repo.
+
+```bash
+# Build e6dl then install it to /usr/local/bin
+make install
+```
+
+You can also install it to a custom path of your choosing:
+
+```bash
+make install INSTALLPATH="/bin"
+```
+
+If you wanna get rid of it:
+
+```bash
+make uninstall
+```
+
+## Building
+
+First, install Go.
+
+Then just:
+
+```bash
+make build
+```
+
+`bin/e6dl` will magically appear. You can also just:
+
+```bash
+go run main.go
+```
+
+To distribute:
+
+```bash
+make dist
+```
+
+3 files will be spit out in the `dist` directory - one for Windows, one for macOS, and one for Linux.
+
+You can also run `make dist-win`, `make dist-macos`, or `make dist-linux` to build them individually.
 
 ## Example
 
