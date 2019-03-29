@@ -12,6 +12,15 @@ import (
 	"github.com/tjhorner/e6dl/e621"
 )
 
+// workState stores the state of all the jobs and
+// is shared across workers
+type workState struct {
+	Total     int
+	Completed int
+	Successes int
+	Failures  int
+}
+
 // BeginDownload takes a slice of posts, a directory to save them in, and a
 // number of concurrent workers to make. It blocks until all the post have
 // been processed. It returns the number of successes, failures, and the total
@@ -25,12 +34,13 @@ func BeginDownload(posts *[]e621.Post, saveDirectory *string, maxConcurrents *in
 	// one
 	pc := make(chan *e621.Post)
 
-	var completed int
-	var successes int
-	var failures int
 	var current int
 
 	total := len(*posts)
+
+	state := workState{
+		Total: total,
+	}
 
 	// If we have more workers than posts, then we don't need all of them
 	if *maxConcurrents > total {
@@ -39,7 +49,7 @@ func BeginDownload(posts *[]e621.Post, saveDirectory *string, maxConcurrents *in
 
 	for i := 0; i < *maxConcurrents; i++ {
 		// Create our workers
-		go work(i+1, *saveDirectory, &completed, &total, &successes, &failures, done, pc)
+		go work(i+1, *saveDirectory, &state, done, pc)
 
 		// Give them their initial posts
 		pc <- &(*posts)[current]
@@ -53,7 +63,7 @@ func BeginDownload(posts *[]e621.Post, saveDirectory *string, maxConcurrents *in
 		<-done
 
 		// If we finished downloading all posts, break out of the loop
-		if successes+failures == total {
+		if state.Successes+state.Failures == total {
 			break
 		}
 
@@ -68,12 +78,12 @@ func BeginDownload(posts *[]e621.Post, saveDirectory *string, maxConcurrents *in
 		current++
 	}
 
-	return &successes, &failures, &total
+	return &state.Successes, &state.Failures, &total
 }
 
-func work(wn int, directory string, completed *int, total *int, successes *int, failures *int, done chan interface{}, pc chan *e621.Post) {
+func work(wn int, directory string, state *workState, done chan interface{}, pc chan *e621.Post) {
 	for {
-		*completed++
+		state.Completed++
 
 		// Wait for a post from main
 		post := <-pc
@@ -81,7 +91,7 @@ func work(wn int, directory string, completed *int, total *int, successes *int, 
 			return
 		}
 
-		progress := aurora.Sprintf(aurora.Green("[%d/%d]"), *completed, *total)
+		progress := aurora.Sprintf(aurora.Green("[%d/%d]"), state.Completed, state.Total)
 		workerText := aurora.Sprintf(aurora.Cyan("[w%d]"), wn)
 
 		fmt.Println(aurora.Sprintf(
@@ -96,9 +106,9 @@ func work(wn int, directory string, completed *int, total *int, successes *int, 
 		err := downloadPost(post, directory)
 		if err != nil {
 			fmt.Printf("[w%d] Failed to download post %d: %v\n", wn, post.ID, err)
-			*failures++
+			state.Failures++
 		} else {
-			*successes++
+			state.Successes++
 		}
 
 		done <- nil
