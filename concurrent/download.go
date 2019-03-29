@@ -108,6 +108,7 @@ func work(wn int, state *workState, wc chan *e621.Post) {
 			state.Successes++
 		}
 
+		// Signal to main goroutine that we are done with this download
 		wc <- nil
 	}
 }
