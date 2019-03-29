@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"path"
 	"strconv"
+	"time"
 
 	"github.com/dustin/go-humanize"
 	"github.com/logrusorgru/aurora"
@@ -27,9 +28,9 @@ func BeginDownload(posts *[]e621.Post, saveDirectory *string, maxConcurrents *in
 	var completed int
 	var successes int
 	var failures int
+	var current int
 
 	total := len(*posts)
-	current := 0
 
 	// If we have more workers than posts, then we don't need all of them
 	if *maxConcurrents > total {
@@ -43,6 +44,8 @@ func BeginDownload(posts *[]e621.Post, saveDirectory *string, maxConcurrents *in
 		// Give them their initial posts
 		pc <- &(*posts)[current]
 		current++
+
+		time.Sleep(time.Millisecond * 50)
 	}
 
 	for {
@@ -55,14 +58,14 @@ func BeginDownload(posts *[]e621.Post, saveDirectory *string, maxConcurrents *in
 		}
 
 		// If there's no more posts to give, stop the worker
-		if current >= total-1 {
+		if current >= total {
 			pc <- nil
 			continue
 		}
 
 		// Give the worker the next post in the array
-		current++
 		pc <- &(*posts)[current]
+		current++
 	}
 
 	return &successes, &failures, &total
@@ -72,8 +75,9 @@ func work(wn int, directory string, completed *int, total *int, successes *int, 
 	for {
 		*completed++
 
+		// Wait for a post from main
 		post := <-pc
-		if post == nil {
+		if post == nil { // nil means there aren't any more posts, so we're OK to break
 			return
 		}
 
@@ -103,7 +107,6 @@ func work(wn int, directory string, completed *int, total *int, successes *int, 
 
 func getSavePath(post *e621.Post, directory *string) string {
 	savePath := path.Join(*directory, strconv.Itoa(post.ID)+"."+post.FileExt)
-
 	return savePath
 }
 
