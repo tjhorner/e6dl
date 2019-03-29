@@ -15,10 +15,11 @@ import (
 // workState stores the state of all the jobs and
 // is shared across workers
 type workState struct {
-	Total     int
-	Completed int
-	Successes int
-	Failures  int
+	Total         int
+	Completed     int
+	Successes     int
+	Failures      int
+	SaveDirectory string
 }
 
 // BeginDownload takes a slice of posts, a directory to save them in, and a
@@ -26,20 +27,16 @@ type workState struct {
 // been processed. It returns the number of successes, failures, and the total
 // amount of posts.
 func BeginDownload(posts *[]e621.Post, saveDirectory *string, maxConcurrents *int) (*int, *int, *int) {
-	// Channel for worker goroutines to notify the main goroutine that it is done
-	// downloading a post
-	done := make(chan interface{})
-
-	// Channel for main goroutine to give workers a post when they are done downloading
-	// one
-	pc := make(chan *e621.Post)
+	// Channel for main goroutine to give workers a post when they are done downloading one
+	wc := make(chan *e621.Post)
 
 	var current int
 
 	total := len(*posts)
 
 	state := workState{
-		Total: total,
+		Total:         total,
+		SaveDirectory: *saveDirectory,
 	}
 
 	// If we have more workers than posts, then we don't need all of them
@@ -49,18 +46,18 @@ func BeginDownload(posts *[]e621.Post, saveDirectory *string, maxConcurrents *in
 
 	for i := 0; i < *maxConcurrents; i++ {
 		// Create our workers
-		go work(i+1, *saveDirectory, &state, done, pc)
+		go work(i+1, &state, wc)
 
 		// Give them their initial posts
-		pc <- &(*posts)[current]
+		wc <- &(*posts)[current]
 		current++
 
 		time.Sleep(time.Millisecond * 50)
 	}
 
 	for {
-		// Wait for a worker to be done
-		<-done
+		// Wait for a worker to be done (they send nil to wc)
+		<-wc
 
 		// If we finished downloading all posts, break out of the loop
 		if state.Successes+state.Failures == total {
@@ -69,24 +66,24 @@ func BeginDownload(posts *[]e621.Post, saveDirectory *string, maxConcurrents *in
 
 		// If there's no more posts to give, stop the worker
 		if current >= total {
-			pc <- nil
+			wc <- nil
 			continue
 		}
 
 		// Give the worker the next post in the array
-		pc <- &(*posts)[current]
+		wc <- &(*posts)[current]
 		current++
 	}
 
 	return &state.Successes, &state.Failures, &total
 }
 
-func work(wn int, directory string, state *workState, done chan interface{}, pc chan *e621.Post) {
+func work(wn int, state *workState, wc chan *e621.Post) {
 	for {
 		state.Completed++
 
 		// Wait for a post from main
-		post := <-pc
+		post := <-wc
 		if post == nil { // nil means there aren't any more posts, so we're OK to break
 			return
 		}
@@ -100,10 +97,10 @@ func work(wn int, directory string, state *workState, done chan interface{}, pc 
 			workerText,
 			post.ID,
 			humanize.Bytes(uint64(post.FileSize)),
-			getSavePath(post, &directory),
+			getSavePath(post, &state.SaveDirectory),
 		))
 
-		err := downloadPost(post, directory)
+		err := downloadPost(post, state.SaveDirectory)
 		if err != nil {
 			fmt.Printf("[w%d] Failed to download post %d: %v\n", wn, post.ID, err)
 			state.Failures++
@@ -111,7 +108,7 @@ func work(wn int, directory string, state *workState, done chan interface{}, pc 
 			state.Successes++
 		}
 
-		done <- nil
+		wc <- nil
 	}
 }
 
