@@ -89,4 +89,6 @@ Usage of e6dl:
     	Download posts from e926 instead of e621
   --tags string
     	Tags to search for
+  --pages int
+    	Number of search result pages to download (default 1)
 ```
