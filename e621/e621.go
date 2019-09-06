@@ -54,7 +54,7 @@ func (date *SerializedDate) Time() time.Time {
 }
 
 // GetPostsForTags gets a list of e621 Posts
-func GetPostsForTags(tags string, limit int, sfw bool) ([]Post, error) {
+func GetPostsForTags(tags string, limit int, sfw bool, page int) ([]Post, error) {
 	client := &http.Client{}
 
 	var domain string
@@ -71,6 +71,7 @@ func GetPostsForTags(tags string, limit int, sfw bool) ([]Post, error) {
 	qs := req.URL.Query()
 	qs.Add("tags", tags)
 	qs.Add("limit", strconv.Itoa(limit))
+	qs.Add("page", strconv.Itoa(page))
 
 	req.URL.RawQuery = qs.Encode()
 
