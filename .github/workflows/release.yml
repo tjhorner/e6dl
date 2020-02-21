@@ -1,0 +1,29 @@
+name: Build and publish release binaries
+on:
+  release:
+    types: [created]
+jobs:
+  build-publish:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+      id: go
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: Get dependencies
+      run: go get -v -t -d ./...
+    - name: Build binaries
+      run: |
+        GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o ./e6dl-windows-amd64.exe .
+        GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o ./e6dl-darwin-amd64 .
+        GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o ./e6dl-linux-amd64 .
+    - name: Upload binaries
+      uses: skx/github-action-publish-binaries@release-1.3
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: 'e6dl-*'
