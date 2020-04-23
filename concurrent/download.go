@@ -96,7 +96,7 @@ func work(wn int, state *workState, wc chan *e621.Post) {
 			progress,
 			workerText,
 			post.ID,
-			humanize.Bytes(uint64(post.FileSize)),
+			humanize.Bytes(uint64(post.File.Size)),
 			getSavePath(post, &state.SaveDirectory),
 		))
 
@@ -114,14 +114,14 @@ func work(wn int, state *workState, wc chan *e621.Post) {
 }
 
 func getSavePath(post *e621.Post, directory *string) string {
-	savePath := path.Join(*directory, strconv.Itoa(post.ID)+"."+post.FileExt)
+	savePath := path.Join(*directory, strconv.Itoa(post.ID)+"."+post.File.Ext)
 	return savePath
 }
 
 func downloadPost(post *e621.Post, directory string) error {
 	savePath := getSavePath(post, &directory)
 
-	resp, err := e621.HTTPGet(post.FileURL)
+	resp, err := e621.HTTPGet(post.File.URL)
 	if err != nil {
 		return err
 	}

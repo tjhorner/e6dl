@@ -8,37 +8,104 @@ import (
 	"time"
 )
 
-// Post represents an e621 post object returned by the e621 API.
+type PostFile struct {
+	Width  int    `json:"width"`
+	Height int    `json:"height"`
+	Ext    string `json:"ext"`
+	Size   int    `json:"size"`
+	Md5    string `json:"md5"`
+	URL    string `json:"url"`
+}
+
+type PostPreview struct {
+	Width  int    `json:"width"`
+	Height int    `json:"height"`
+	URL    string `json:"url"`
+}
+
+type PostSample struct {
+	Has    bool   `json:"has"`
+	Height int    `json:"height"`
+	Width  int    `json:"width"`
+	URL    string `json:"url"`
+}
+
+type PostScore struct {
+	Up    int `json:"up"`
+	Down  int `json:"down"`
+	Total int `json:"total"`
+}
+
+type PostTags struct {
+	General   []string `json:"general"`
+	Species   []string `json:"species"`
+	Character []string `json:"character"`
+	Copyright []string `json:"copyright"`
+	Artist    []string `json:"artist"`
+	Invalid   []string `json:"invalid"`
+	Lore      []string `json:"lore"`
+	Meta      []string `json:"meta"`
+}
+
+func (t *PostTags) All() []string {
+	allTags := []string{}
+
+	groups := [][]string{
+		t.General,
+		t.Species,
+		t.Character,
+		t.Copyright,
+		t.Artist,
+		t.Invalid,
+		t.Lore,
+		t.Meta,
+	}
+
+	for _, g := range groups {
+		allTags = append(allTags, g...)
+	}
+
+	return allTags
+}
+
+type PostFlags struct {
+	Pending      bool `json:"pending"`
+	Flagged      bool `json:"flagged"`
+	NoteLocked   bool `json:"note_locked"`
+	StatusLocked bool `json:"status_locked"`
+	RatingLocked bool `json:"rating_locked"`
+	Deleted      bool `json:"deleted"`
+}
+
+type PostRelationships struct {
+	ParentID          int   `json:"parent_id"`
+	HasChildren       bool  `json:"has_children"`
+	HasActiveChildren bool  `json:"has_active_children"`
+	Children          []int `json:"children"`
+}
+
 type Post struct {
-	ID             int            `json:"id"`             // The ID of the post
-	Tags           string         `json:"tags"`           // Space-separated list of tags attached to this post
-	LockedTags     bool           `json:"locked_tags"`    // (undocumented)
-	Description    string         `json:"description"`    // The post's description
-	CreatedAt      SerializedDate `json:"created_at"`     // When the post was uploaded
-	CreatorID      int            `json:"creator_id"`     // User ID of the user who uploaded the post
-	Author         string         `json:"author"`         // Username of the user who uploaded the post
-	Change         int            `json:"change"`         // (undocumented)
-	Source         string         `json:"source"`         // URL that the source for this post can be found at
-	Score          int            `json:"score"`          // The post's score (upvotes - downvotes)
-	FavoritesCount int            `json:"fav_count"`      // Amount of users that favorited this post
-	MD5Hash        string         `json:"md5"`            // MD5-sum of the post's file's content
-	FileSize       int            `json:"file_size"`      // Size of the post's file
-	FileURL        string         `json:"file_url"`       // URL to the full-sized file
-	FileExt        string         `json:"file_ext"`       // File extension
-	PreviewURL     string         `json:"preview_url"`    // URL to preview-sized version of the file
-	PreviewHeight  int            `json:"preview_height"` // Height of the preview
-	PreviewWidth   int            `json:"preview_width"`  // Width of the preview
-	Rating         string         `json:"rating"`         // Rating of the file ("safe", "questionable", "explicit")
-	Status         string         `json:"status"`         // Moderation status ("active" or "pending")
-	Width          int            `json:"width"`          // Width of the original file
-	Height         int            `json:"height"`         // Height of the original file
-	HasComments    bool           `json:"has_comments"`   // True if post has comments
-	HasNotes       bool           `json:"has_notes"`      // True if post has notes
-	HasChildren    bool           `json:"has_children"`   // True if post has children
-	Children       string         `json:"children"`       // Comma-separated list of children post IDs
-	ParentID       int            `json:"parent_id"`      // ID of the parent post
-	Artist         []string       `json:"artist"`         // Slice of artist names
-	Sources        []string       `json:"sources"`        // Slice of source URLs
+	ID            int               `json:"id"`
+	CreatedAt     string            `json:"created_at"`
+	UpdatedAt     string            `json:"updated_at"`
+	File          PostFile          `json:"file"`
+	Preview       PostPreview       `json:"preview"`
+	Sample        PostSample        `json:"sample"`
+	Score         PostScore         `json:"score"`
+	Tags          PostTags          `json:"tags"`
+	LockedTags    []string          `json:"locked_tags"`
+	ChangeSeq     int               `json:"change_seq"`
+	Flags         PostFlags         `json:"flags"`
+	Rating        string            `json:"rating"`
+	FavCount      int               `json:"fav_count"`
+	Sources       []string          `json:"sources"`
+	Pools         []int             `json:"pools"`
+	Relationships PostRelationships `json:"relationships"`
+	ApproverID    int               `json:"approver_id"`
+	UploaderID    int               `json:"uploader_id"`
+	Description   string            `json:"description"`
+	CommentCount  int               `json:"comment_count"`
+	IsFavorited   bool              `json:"is_favorited"`
 }
 
 // SerializedDate represents a serialized date passed via JSON
@@ -65,7 +132,7 @@ func GetPostsForTags(tags string, limit int, sfw bool, page int) ([]Post, error)
 		domain = "e621.net"
 	}
 
-	req, _ := http.NewRequest("GET", "https://"+domain+"/post/index.json", nil)
+	req, _ := http.NewRequest("GET", "https://"+domain+"/posts.json", nil)
 	req.Header.Set("User-Agent", "e6dl: go edition (@tjhorner on Telegram)")
 
 	qs := req.URL.Query()
@@ -87,8 +154,11 @@ func GetPostsForTags(tags string, limit int, sfw bool, page int) ([]Post, error)
 		return nil, err
 	}
 
-	var posts []Post
-	json.Unmarshal(body, &posts)
+	var respBody struct {
+		Posts []Post
+	}
 
-	return posts, nil
+	json.Unmarshal(body, &respBody)
+
+	return respBody.Posts, nil
 }
