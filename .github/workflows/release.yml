@@ -24,9 +24,7 @@ jobs:
     - name: Compress binaries with upx
       run: |
         sudo apt-get install -y upx
-        upx e6dl-windows-amd64.exe
-        upx e6dl-darwin-amd64
-        upx e6dl-linux-amd64
+        upx e6dl-windows-amd64.exe e6dl-darwin-amd64 e6dl-linux-amd64
     - name: Upload binaries
       uses: skx/github-action-publish-binaries@release-1.3
       env:
