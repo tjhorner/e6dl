@@ -1,6 +1,6 @@
 #!/bin/bash
 
-latest_release="v0.0.6"
+latest_release="v0.0.9"
 
 case $(uname -s) in
   Darwin*) os="darwin";;

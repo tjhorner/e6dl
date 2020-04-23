@@ -23,7 +23,7 @@ jobs:
         GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o ./e6dl-linux-amd64 .
     - name: Compress binaries with upx
       run: |
-        sudo apt-get install upx
+        sudo apt-get install -y upx
         upx e6dl-windows-amd64.exe
         upx e6dl-darwin-amd64
         upx e6dl-linux-amd64
