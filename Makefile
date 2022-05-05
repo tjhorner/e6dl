@@ -14,9 +14,15 @@ dist-macos: ensure-dist-dir
 	# Build for macOS x64
 	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o dist/e6dl-darwin-amd64 main.go
 
+	# Build for macOS ARM
+	GOOS=darwin GOARCH=arm64 $(GOBUILD) -o dist/e6dl-darwin-arm64 main.go
+
 dist-linux: ensure-dist-dir
 	# Build for Linux x64
 	GOOS=linux GOARCH=amd64 $(GOBUILD) -o dist/e6dl-linux-amd64 main.go
+
+	# Build for Linux PPC64
+	GOOS=linux GOARCH=ppc64 $(GOBUILD) -o dist/e6dl-linux-ppc64 main.go
 
 dist: dist-win dist-macos dist-linux
 
